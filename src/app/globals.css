@@ -44,6 +44,11 @@ body {
 .delay-3 { animation-delay: 150ms; }
 .delay-4 { animation-delay: 200ms; }
 
+/* Cursor pointer for all interactive elements */
+button, a, [role="button"], input[type="checkbox"], input[type="color"], select {
+  cursor: pointer;
+}
+
 .skeleton {
   background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
   background-size: 200% 100%;
