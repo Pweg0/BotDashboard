@@ -1,17 +1,16 @@
-import { auth } from './lib/auth';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-// Middleware handles basic session check for /dashboard/* routes.
-// Role verification (adminRoleId) is performed in the dashboard layout server component
-// to avoid Edge runtime compatibility issues with Mongoose.
-export default auth((req) => {
-  const session = req.auth;
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
-  // Not logged in -> redirect to login
-  if (!session?.user) {
+  if (!token) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ['/dashboard/:path*'],
