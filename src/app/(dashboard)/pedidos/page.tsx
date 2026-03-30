@@ -64,6 +64,7 @@ export default function PedidosPage() {
   const [activeStatus, setActiveStatus] = useState<OrderStatus>('todos');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const limit = 20;
 
@@ -99,6 +100,24 @@ export default function PedidosPage() {
   function handleStatusChange(status: OrderStatus) {
     setActiveStatus(status);
     setPage(0);
+  }
+
+  async function handleCancel(orderId: string) {
+    if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+    setCancellingId(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: 'PATCH' });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? 'Erro ao cancelar pedido.');
+        return;
+      }
+      await fetchOrders(activeStatus, page);
+    } catch {
+      setError('Erro ao cancelar pedido.');
+    } finally {
+      setCancellingId(null);
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -150,6 +169,7 @@ export default function PedidosPage() {
                   <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Valor</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Status</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Data</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,6 +200,17 @@ export default function PedidosPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-sm">
                         {formatDate(order.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        {order.status === 'pending_payment' && (
+                          <button
+                            onClick={() => handleCancel(order._id)}
+                            disabled={cancellingId === order._id}
+                            className="px-3 py-1 bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-xs font-medium transition-colors"
+                          >
+                            {cancellingId === order._id ? 'Cancelando...' : 'Cancelar'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
