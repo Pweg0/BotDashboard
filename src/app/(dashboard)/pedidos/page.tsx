@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 type OrderStatus = 'todos' | 'pending_payment' | 'paid' | 'delivered' | 'cancelled' | 'expired';
 
@@ -27,23 +27,23 @@ const STATUS_TABS: { key: OrderStatus; label: string }[] = [
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   pending_payment: {
     label: 'Pendente',
-    className: 'bg-amber-400/12 text-amber-200',
+    className: 'bg-yellow-900/60 text-yellow-400 border-yellow-800',
   },
   paid: {
     label: 'Pago',
-    className: 'bg-emerald-400/12 text-emerald-200',
+    className: 'bg-green-900/60 text-green-400 border-green-800',
   },
   delivered: {
     label: 'Entregue',
-    className: 'bg-cyan-400/12 text-cyan-200',
+    className: 'bg-blue-900/60 text-blue-400 border-blue-800',
   },
   cancelled: {
     label: 'Cancelado',
-    className: 'bg-rose-400/12 text-rose-200',
+    className: 'bg-red-900/60 text-red-400 border-red-800',
   },
   expired: {
     label: 'Expirado',
-    className: 'bg-orange-400/12 text-orange-200',
+    className: 'bg-orange-900/60 text-orange-400 border-orange-800',
   },
 };
 
@@ -55,13 +55,6 @@ function formatDate(dateStr: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function formatMoney(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
 }
 
 export default function PedidosPage() {
@@ -132,240 +125,128 @@ export default function PedidosPage() {
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
-  const paidCount = orders.filter((order) => order.status === 'paid').length;
-  const pendingCount = orders.filter((order) => order.status === 'pending_payment').length;
-  const revenue = orders
-    .filter((order) => order.status === 'paid' || order.status === 'delivered')
-    .reduce((acc, order) => acc + order.amount, 0);
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 xl:grid-cols-[1.55fr_1fr]">
-        <div className="glass-panel animate-fade-up stagger-1 rounded-[28px] p-6">
-          <p className="hud-label mb-3">Orders Flow</p>
-          <h1 className="tech-title text-4xl font-semibold text-white">
-            Monitoramento financeiro com atmosfera de central tática
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Aqui a ideia é sair da tabela administrativa básica e transformar a visão de pedidos
-            em um cockpit: filtros mais visíveis, métricas na entrada e status com leitura imediata.
-          </p>
-        </div>
+    <div>
+      <h1 className="text-2xl font-bold text-white mb-6">Pedidos</h1>
 
-        <div className="glass-panel animate-fade-up stagger-2 rounded-[28px] p-6">
-          <p className="hud-label mb-3">Design Lens</p>
-          <div className="space-y-4">
-            <div className="rounded-3xl border border-emerald-300/18 bg-emerald-400/8 p-4">
-              <p className="text-base font-semibold text-white">UX mais operacional</p>
-              <p className="mt-2 text-sm leading-6 text-slate-400">
-                O usuário entende em segundos o que está pendente, o que já converteu e onde agir.
-              </p>
-            </div>
-            <button
-              onClick={() => fetchOrders(activeStatus, page)}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:text-white"
-            >
-              Recarregar pedidos
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Pedidos na página', value: String(orders.length), glow: 'cyan' },
-          { label: 'Pendentes', value: String(pendingCount), glow: 'amber' },
-          { label: 'Pagos', value: String(paidCount), glow: 'emerald' },
-          { label: 'Receita visível', value: formatMoney(revenue), glow: 'violet' },
-        ].map((item, index) => (
-          <div
-            key={item.label}
-            className={`glass-panel animate-fade-up rounded-[24px] p-5 ${index === 0 ? 'stagger-1' : index === 1 ? 'stagger-2' : index === 2 ? 'stagger-3' : 'stagger-4'}`}
+      {/* Status Filter Tabs */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => handleStatusChange(tab.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeStatus === tab.key
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
+            }`}
           >
-            <p className="mono text-[11px] uppercase tracking-[0.24em] text-slate-500">
-              {item.label}
-            </p>
-            <p className="tech-title mt-4 text-3xl font-semibold text-white">{item.value}</p>
-          </div>
+            {tab.label}
+          </button>
         ))}
-      </section>
-
-      <section className="glass-panel animate-fade-up stagger-2 rounded-[30px] p-4 sm:p-6">
-        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="hud-label mb-2">Status Router</p>
-            <h2 className="text-xl font-semibold text-white">Filtre o fluxo com mais clareza</h2>
-          </div>
-          <div className="mono text-[11px] uppercase tracking-[0.22em] text-slate-500">
-            Página {page + 1} de {totalPages} / {total} registros
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => handleStatusChange(tab.key)}
-              className={`rounded-2xl px-4 py-3 text-sm font-medium ${
-                activeStatus === tab.key
-                  ? 'bg-[linear-gradient(135deg,#70d1ff,#29f0b4)] text-slate-950'
-                  : 'border border-white/10 bg-white/5 text-slate-300 hover:border-cyan-300/25 hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </section>
+      </div>
 
       {error && (
-        <div className="glass-panel rounded-[24px] border-rose-400/20 bg-rose-500/10 p-4 text-rose-100">
+        <div className="mb-4 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg">
           {error}
         </div>
       )}
 
-      <section className="grid gap-6 xl:grid-cols-[1.65fr_0.95fr]">
-        <div className="glass-panel animate-fade-up stagger-3 overflow-hidden rounded-[30px]">
-          {loading ? (
-            <div className="px-6 py-16 text-center text-slate-400">Sincronizando fluxo de pedidos...</div>
-          ) : orders.length === 0 ? (
-            <div className="px-6 py-16 text-center">
-              <p className="text-lg font-medium text-white">Nenhum pedido encontrado</p>
-              <p className="mt-2 text-sm text-slate-400">
-                Quando houver atividade, esta área vira a central principal de operação.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      {['ID', 'Comprador', 'Produto', 'Qtd', 'Valor', 'Status', 'Data', 'Ações'].map(
-                        (label) => (
-                          <th
-                            key={label}
-                            className="px-6 py-4 text-left text-[11px] uppercase tracking-[0.24em] text-slate-500"
-                          >
-                            {label}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order) => {
-                      const badge = STATUS_BADGE[order.status] ?? {
-                        label: order.status,
-                        className: 'bg-white/8 text-slate-300',
-                      };
-
-                      return (
-                        <tr
-                          key={order._id}
-                          className="border-b border-white/6 bg-white/[0.01] hover:bg-cyan-400/[0.03]"
-                        >
-                          <td className="px-6 py-4">
-                            <span className="mono rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                              {order._id.slice(-8)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="font-medium text-white">{order.username}</p>
-                            <p className="mt-1 text-xs text-slate-500">{order.paymentMethod}</p>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">
-                            {order.productSnapshot?.name ?? '-'}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">{order.quantity}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-white">
-                            {formatMoney(order.amount)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] ${badge.className}`}
-                            >
-                              {badge.label}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-400">
-                            {formatDate(order.createdAt)}
-                          </td>
-                          <td className="px-6 py-4">
-                            {order.status === 'pending_payment' ? (
-                              <button
-                                onClick={() => handleCancel(order._id)}
-                                disabled={cancellingId === order._id}
-                                className="rounded-xl bg-rose-400/12 px-3 py-2 text-xs font-semibold text-rose-200 hover:bg-rose-400/20 disabled:opacity-40"
-                              >
-                                {cancellingId === order._id ? 'Cancelando...' : 'Cancelar'}
-                              </button>
-                            ) : (
-                              <span className="mono text-[11px] uppercase tracking-[0.2em] text-slate-600">
-                                Sem ação
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex flex-col gap-4 border-t border-white/10 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-400">
-                  Use este rodapé como zona de navegação rápida sem roubar destaque da tabela.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPage((currentPage) => Math.max(0, currentPage - 1))}
-                    disabled={page === 0}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white disabled:opacity-40"
-                  >
-                    Anterior
-                  </button>
-                  <button
-                    onClick={() => setPage((currentPage) => Math.min(totalPages - 1, currentPage + 1))}
-                    disabled={page >= totalPages - 1}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white disabled:opacity-40"
-                  >
-                    Próxima
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
+      {/* Orders Table */}
+      {loading ? (
+        <p className="text-gray-400">Carregando...</p>
+      ) : orders.length === 0 ? (
+        <div className="bg-gray-800 rounded-lg p-8 text-center border border-gray-700">
+          <p className="text-gray-400">Nenhum pedido encontrado.</p>
         </div>
-
-        <aside className="space-y-6">
-          <div className="glass-panel animate-fade-up stagger-3 rounded-[28px] p-6">
-            <p className="hud-label mb-3">O que melhora</p>
-            <ul className="space-y-3 text-sm leading-6 text-slate-400">
-              <li>Filtro com presença visual mais forte e feedback instantâneo.</li>
-              <li>Status legível por cor e shape, não só por texto.</li>
-              <li>Rodapé de paginação integrado ao contexto da lista.</li>
-              <li>Resumo financeiro sobe para a entrada da tela, onde importa.</li>
-            </ul>
+      ) : (
+        <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">ID</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Comprador</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Produto</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Qtd</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Valor</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Status</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Data</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => {
+                  const badge = STATUS_BADGE[order.status] ?? {
+                    label: order.status,
+                    className: 'bg-gray-700 text-gray-400 border-gray-600',
+                  };
+                  return (
+                    <tr key={order._id} className="border-b border-gray-700 hover:bg-gray-700/50">
+                      <td className="px-4 py-3 text-gray-400 font-mono text-xs">
+                        {order._id.slice(-8)}
+                      </td>
+                      <td className="px-4 py-3 text-gray-200">{order.username}</td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {order.productSnapshot?.name ?? '-'}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300 text-center">{order.quantity}</td>
+                      <td className="px-4 py-3 text-gray-300">
+                        R$ {order.amount.toFixed(2).replace('.', ',')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium border ${badge.className}`}
+                        >
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-sm">
+                        {formatDate(order.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        {order.status === 'pending_payment' && (
+                          <button
+                            onClick={() => handleCancel(order._id)}
+                            disabled={cancellingId === order._id}
+                            className="px-3 py-1 bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-xs font-medium transition-colors"
+                          >
+                            {cancellingId === order._id ? 'Cancelando...' : 'Cancelar'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
-          <div className="glass-panel animate-fade-up stagger-4 rounded-[28px] p-6">
-            <p className="hud-label mb-3">Evoluções possíveis</p>
-            <div className="space-y-4">
-              {[
-                'Timeline visual por pedido com histórico de status',
-                'Busca por comprador ou produto',
-                'Heatmap simples de horário com mais conversões',
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.8)]" />
-                  <span className="text-sm text-slate-300">{item}</span>
-                </div>
-              ))}
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-700">
+            <p className="text-gray-400 text-sm">
+              Página {page + 1} de {totalPages} &mdash; {total} pedido{total !== 1 ? 's' : ''}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-sm font-medium transition-colors"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-sm font-medium transition-colors"
+              >
+                Próxima
+              </button>
             </div>
           </div>
-        </aside>
-      </section>
+        </div>
+      )}
     </div>
   );
 }
