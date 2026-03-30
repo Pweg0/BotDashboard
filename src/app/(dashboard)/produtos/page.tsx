@@ -192,110 +192,156 @@ export default function ProdutosPage() {
     }
   }
 
+  const publishedCount = products.filter((p) => p.status === 'published').length;
+  const draftCount = products.length - publishedCount;
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Produtos</h1>
+    <div className="max-w-[1200px] mx-auto space-y-6">
+      {/* Header */}
+      <div className="animate-in flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Produtos</h1>
+          <p className="text-sm text-zinc-500 mt-1">Gerencie o catalogo da loja</p>
+        </div>
         <button
           onClick={openCreateForm}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:scale-[0.97] text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-lg shadow-violet-600/20"
         >
-          Novo Produto
+          + Novo Produto
         </button>
       </div>
 
+      {/* Stats */}
+      <div className="animate-in delay-1 grid grid-cols-3 gap-4">
+        {[
+          { label: 'Total', value: products.length, color: 'text-white' },
+          { label: 'Publicados', value: publishedCount, color: 'text-emerald-400' },
+          { label: 'Rascunhos', value: draftCount, color: 'text-zinc-400' },
+        ].map((stat) => (
+          <div key={stat.label} className="bg-[#11131a] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</p>
+            <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Error */}
       {actionError && (
-        <div className="mb-4 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg">
-          {actionError}
+        <div className="animate-in bg-red-500/[0.08] border border-red-500/20 rounded-xl p-4">
+          <p className="text-red-300 text-sm">{actionError}</p>
         </div>
       )}
 
-      {/* Products Table */}
-      {loading ? (
-        <p className="text-gray-400">Carregando...</p>
-      ) : products.length === 0 ? (
-        <div className="bg-gray-800 rounded-lg p-8 text-center">
-          <p className="text-gray-400">Nenhum produto cadastrado.</p>
-        </div>
-      ) : (
-        <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Nome</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Preço</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Categoria</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Estoque</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Status</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium text-sm">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product._id} className="border-b border-gray-700 hover:bg-gray-700/50">
-                  <td className="px-4 py-3 text-gray-200 font-medium">{product.name}</td>
-                  <td className="px-4 py-3 text-gray-300">
-                    R$ {product.price.toFixed(2).replace('.', ',')}
-                  </td>
-                  <td className="px-4 py-3 text-gray-300">{product.category}</td>
-                  <td className="px-4 py-3 text-gray-300">
-                    {product.stock !== null ? product.stock : 'Ilimitado'}
-                  </td>
-                  <td className="px-4 py-3">
-                    {product.status === 'published' ? (
-                      <span className="px-2 py-1 bg-green-900/60 text-green-400 rounded text-xs font-medium border border-green-800">
-                        Publicado
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 bg-gray-700 text-gray-400 rounded text-xs font-medium border border-gray-600">
-                        Rascunho
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openEditForm(product)}
-                        className="px-3 py-1 bg-blue-700 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleTogglePublish(product)}
-                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                          product.status === 'published'
-                            ? 'bg-yellow-700 hover:bg-yellow-600 text-white'
-                            : 'bg-green-700 hover:bg-green-600 text-white'
-                        }`}
-                      >
-                        {product.status === 'published' ? 'Despublicar' : 'Publicar'}
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirmId(product._id)}
-                        className="px-3 py-1 bg-red-700 hover:bg-red-600 text-white rounded text-xs font-medium transition-colors"
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
+      {/* Table */}
+      <div className="animate-in delay-2">
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="skeleton h-16 w-full" />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="bg-[#11131a] border border-white/[0.06] rounded-xl p-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <p className="text-zinc-400 font-medium">Nenhum produto cadastrado</p>
+            <p className="text-zinc-600 text-sm mt-1">Crie seu primeiro produto para comecar</p>
+          </div>
+        ) : (
+          <div className="bg-[#11131a] border border-white/[0.06] rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  {['Nome', 'Preco', 'Categoria', 'Estoque', 'Status', 'Acoes'].map((h) => (
+                    <th key={h} className="text-left px-5 py-3.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {products.map((product, i) => (
+                  <tr
+                    key={product._id}
+                    className={`border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors animate-in`}
+                    style={{ animationDelay: `${i * 30}ms` }}
+                  >
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-medium text-zinc-200">{product.name}</p>
+                      <p className="text-xs text-zinc-600 mt-0.5 truncate max-w-[200px]">{product.description}</p>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-zinc-300 tabular-nums">
+                      R$ {product.price.toFixed(2).replace('.', ',')}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex px-2.5 py-1 bg-zinc-800/80 text-zinc-400 rounded-md text-xs font-medium">
+                        {product.category}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-zinc-400 tabular-nums">
+                      {product.stock !== null ? product.stock : (
+                        <span className="text-zinc-600">Ilimitado</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      {product.status === 'published' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/[0.1] text-emerald-400 rounded-md text-xs font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          Publicado
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 text-zinc-500 rounded-md text-xs font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                          Rascunho
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openEditForm(product)}
+                          className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleTogglePublish(product)}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                            product.status === 'published'
+                              ? 'text-amber-400 bg-amber-500/[0.08] hover:bg-amber-500/[0.14]'
+                              : 'text-emerald-400 bg-emerald-500/[0.08] hover:bg-emerald-500/[0.14]'
+                          }`}
+                        >
+                          {product.status === 'published' ? 'Despublicar' : 'Publicar'}
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(product._id)}
+                          className="px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/[0.08] hover:bg-red-500/[0.14] rounded-lg transition-colors"
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Create/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in">
+          <div className="bg-[#11131a] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
+            <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
               <h2 className="text-lg font-bold text-white">
                 {editingId ? 'Editar Produto' : 'Novo Produto'}
               </h2>
               <button
                 onClick={closeForm}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -304,31 +350,33 @@ export default function ProdutosPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Nome */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
                   Nome <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                    formErrors.name ? 'border-red-500' : 'border-gray-600'
+                  className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
+                    formErrors.name ? 'border-red-500/50' : 'border-white/[0.08]'
                   }`}
                   placeholder="Ex: VIP Bronze"
                 />
                 {formErrors.name && <p className="text-red-400 text-xs mt-1">{formErrors.name}</p>}
               </div>
 
+              {/* Descricao */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Descrição <span className="text-red-400">*</span>
+                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+                  Descricao <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none ${
-                    formErrors.description ? 'border-red-500' : 'border-gray-600'
+                  className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 resize-none transition-all ${
+                    formErrors.description ? 'border-red-500/50' : 'border-white/[0.08]'
                   }`}
                   placeholder="Descreva o produto..."
                   rows={3}
@@ -340,8 +388,8 @@ export default function ProdutosPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Preço (R$) <span className="text-red-400">*</span>
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    Preco (R$) <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="number"
@@ -349,119 +397,111 @@ export default function ProdutosPage() {
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                      formErrors.price ? 'border-red-500' : 'border-gray-600'
+                    className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
+                      formErrors.price ? 'border-red-500/50' : 'border-white/[0.08]'
                     }`}
                     placeholder="0.00"
                   />
-                  {formErrors.price && (
-                    <p className="text-red-400 text-xs mt-1">{formErrors.price}</p>
-                  )}
+                  {formErrors.price && <p className="text-red-400 text-xs mt-1">{formErrors.price}</p>}
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Estoque (vazio = ilimitado)
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    Estoque
                   </label>
                   <input
                     type="number"
                     min="0"
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all"
                     placeholder="Ilimitado"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
                   URL da Imagem <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                    formErrors.imageUrl ? 'border-red-500' : 'border-gray-600'
+                  className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
+                    formErrors.imageUrl ? 'border-red-500/50' : 'border-white/[0.08]'
                   }`}
                   placeholder="https://exemplo.com/imagem.png"
                 />
-                {formErrors.imageUrl && (
-                  <p className="text-red-400 text-xs mt-1">{formErrors.imageUrl}</p>
-                )}
+                {formErrors.imageUrl && <p className="text-red-400 text-xs mt-1">{formErrors.imageUrl}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
                   Categoria <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                    formErrors.category ? 'border-red-500' : 'border-gray-600'
+                  className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
+                    formErrors.category ? 'border-red-500/50' : 'border-white/[0.08]'
                   }`}
                   placeholder="Ex: VIP, Kits, Itens"
                 />
-                {formErrors.category && (
-                  <p className="text-red-400 text-xs mt-1">{formErrors.category}</p>
-                )}
+                {formErrors.category && <p className="text-red-400 text-xs mt-1">{formErrors.category}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Ordem de exibição
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    Ordem de exibicao
                   </label>
                   <input
                     type="number"
                     value={formData.sortOrder}
                     onChange={(e) => setFormData({ ...formData, sortOrder: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all"
                     placeholder="0"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
                     Cor do embed
                   </label>
                   <input
                     type="color"
                     value={formData.embedColor}
                     onChange={(e) => setFormData({ ...formData, embedColor: e.target.value })}
-                    className="w-full h-10 px-1 py-1 bg-gray-700 border border-gray-600 rounded-lg cursor-pointer"
+                    className="w-full h-[42px] px-1.5 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-xl cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 py-1">
                 <input
                   type="checkbox"
                   id="allowsMultiple"
                   checked={formData.allowsMultiple}
                   onChange={(e) => setFormData({ ...formData, allowsMultiple: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600"
+                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-violet-600 focus:ring-violet-500/40"
                 />
-                <label htmlFor="allowsMultiple" className="text-sm text-gray-300">
-                  Permite comprar múltiplas unidades
+                <label htmlFor="allowsMultiple" className="text-sm text-zinc-400">
+                  Permite comprar multiplas unidades
                 </label>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-3">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                  className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all duration-200"
                 >
                   {submitting ? 'Salvando...' : 'Salvar'}
                 </button>
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  className="flex-1 py-2.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 text-sm font-medium rounded-xl transition-colors"
                 >
                   Cancelar
                 </button>
@@ -471,24 +511,29 @@ export default function ProdutosPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-sm">
-            <h2 className="text-lg font-bold text-white mb-2">Confirmar exclusão</h2>
-            <p className="text-gray-400 mb-6">
-              Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in">
+          <div className="bg-[#11131a] border border-white/[0.08] rounded-2xl p-6 w-full max-w-sm shadow-2xl shadow-black/50">
+            <div className="w-12 h-12 rounded-full bg-red-500/[0.1] flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-white text-center mb-2">Confirmar exclusao</h2>
+            <p className="text-zinc-500 text-sm text-center mb-6">
+              Tem certeza que deseja excluir este produto? Esta acao nao pode ser desfeita.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => handleDelete(deleteConfirmId)}
-                className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white text-sm font-medium rounded-xl transition-colors"
               >
                 Excluir
               </button>
               <button
                 onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                className="flex-1 py-2.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 text-sm font-medium rounded-xl transition-colors"
               >
                 Cancelar
               </button>
