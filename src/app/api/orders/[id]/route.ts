@@ -17,6 +17,7 @@ export async function PATCH(
       $set: {
         status: 'cancelled',
         cancelledAt: new Date(),
+        cancelledBy: 'admin',
         discordNotified: false,
       },
       $push: {

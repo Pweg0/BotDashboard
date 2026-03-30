@@ -39,6 +39,7 @@ const OrderSchema = new Schema(
     paidAt: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
+    cancelledBy: { type: String, enum: ['admin', 'system'], default: undefined },
     ordersChannelMessageId: { type: String },
   },
   {
