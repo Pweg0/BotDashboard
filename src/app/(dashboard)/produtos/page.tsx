@@ -195,6 +195,15 @@ export default function ProdutosPage() {
   const publishedCount = products.filter((p) => p.status === 'published').length;
   const draftCount = products.length - publishedCount;
 
+  // Group products by category
+  const grouped = products.reduce<Record<string, Product[]>>((acc, product) => {
+    const cat = product.category || 'Sem categoria';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(product);
+    return acc;
+  }, {});
+  const categoryNames = Object.keys(grouped).sort();
+
   return (
     <div className="max-w-[1200px] mx-auto space-y-6">
       {/* Header */}
@@ -251,53 +260,64 @@ export default function ProdutosPage() {
             <p className="text-zinc-600 text-sm mt-1">Crie seu primeiro produto para comecar</p>
           </div>
         ) : (
-          <div className="bg-[#11131a] border border-white/[0.06] rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/[0.06]">
-                  {['Nome', 'Preco', 'Categoria', 'Estoque', 'Status', 'Acoes'].map((h) => (
-                    <th key={h} className="text-left px-5 py-3.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product, i) => (
-                  <tr
-                    key={product._id}
-                    className={`border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors animate-in`}
-                    style={{ animationDelay: `${i * 30}ms` }}
-                  >
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-zinc-200">{product.name}</p>
-                      <p className="text-xs text-zinc-600 mt-0.5 truncate max-w-[200px]">{product.description}</p>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-zinc-300 tabular-nums">
-                      R$ {product.price.toFixed(2).replace('.', ',')}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="inline-flex px-2.5 py-1 bg-zinc-800/80 text-zinc-400 rounded-md text-xs font-medium">
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-zinc-400 tabular-nums">
-                      {product.stock !== null ? product.stock : (
-                        <span className="text-zinc-600">Ilimitado</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      {product.status === 'published' ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/[0.1] text-emerald-400 rounded-md text-xs font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          Publicado
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 text-zinc-500 rounded-md text-xs font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                          Rascunho
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
+          <div className="space-y-4">
+            {categoryNames.map((category, catIdx) => (
+              <div key={category} className="bg-[#11131a] border border-white/[0.06] rounded-xl overflow-hidden animate-in" style={{ animationDelay: `${catIdx * 60}ms` }}>
+                {/* Category header */}
+                <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-violet-500/[0.12] flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-semibold text-white">{category}</h3>
+                  <span className="text-[11px] text-zinc-600 font-medium">{grouped[category].length} produto{grouped[category].length !== 1 ? 's' : ''}</span>
+                </div>
+
+                {/* Products in category */}
+                <div>
+                  {grouped[category].map((product, i) => (
+                    <div
+                      key={product._id}
+                      className={`flex items-center gap-4 pl-10 pr-5 py-3.5 hover:bg-white/[0.02] transition-colors ${i < grouped[category].length - 1 ? 'border-b border-white/[0.04]' : ''}`}
+                    >
+                      {/* Indent line */}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-zinc-700 select-none">&#8226;</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-zinc-200">{product.name}</p>
+                          <p className="text-xs text-zinc-600 mt-0.5 truncate">{product.description}</p>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="w-24 text-right">
+                        <p className="text-sm text-zinc-300 tabular-nums">R$ {product.price.toFixed(2).replace('.', ',')}</p>
+                      </div>
+
+                      {/* Stock */}
+                      <div className="w-20 text-right">
+                        <p className="text-xs text-zinc-500 tabular-nums">
+                          {product.stock !== null ? `${product.stock} un.` : 'Ilimitado'}
+                        </p>
+                      </div>
+
+                      {/* Status */}
+                      <div className="w-24">
+                        {product.status === 'published' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/[0.1] text-emerald-400 rounded-md text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            Publicado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/80 text-zinc-500 rounded-md text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                            Rascunho
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Actions */}
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => openEditForm(product)}
@@ -322,11 +342,11 @@ export default function ProdutosPage() {
                           Excluir
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
