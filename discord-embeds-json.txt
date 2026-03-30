@@ -1,0 +1,116 @@
+ATM10
+{
+  "embeds": [
+    {
+      "color": 3407667,
+      "title": "ATM10 | CraftPro Brasil",
+      "description": "A experiencia definitiva de All The Mods 10 no Brasil. Infraestrutura nacional, baixo ping e um servidor pensado para progressao longa, desempenho estavel e comunidade ativa.",
+      "fields": [
+        {
+          "name": "Conectar",
+          "value": "atm10.craftprobrasil.com.br",
+          "inline": false
+        },
+        {
+          "name": "Modpack",
+          "value": "All The Mods 10\nv6.0",
+          "inline": true
+        },
+        {
+          "name": "Regiao",
+          "value": "Sao Paulo, Brasil",
+          "inline": true
+        },
+        {
+          "name": "Status",
+          "value": "Online",
+          "inline": true
+        },
+        {
+          "name": "Diferenciais",
+          "value": "Ping nacional\nProgressao completa\nEstrutura estavel\nComunidade focada em survival modded",
+          "inline": false
+        },
+        {
+          "name": "Configuracao",
+          "value": "Chunks: 80\nForce Load: 16\nItens banidos: Nenhum",
+          "inline": true
+        },
+        {
+          "name": "Filosofia do servidor",
+          "value": "Estilo vanilla-friendly\nStaff discreta\nSem Pay-to-Win",
+          "inline": true
+        },
+        {
+          "name": "Como entrar",
+          "value": "1. Instale o modpack All The Mods 10\n2. Abra Multijogador\n3. Adicione o IP acima\n4. Entre no servidor e comece sua jornada",
+          "inline": false
+        }
+      ],
+      "footer": {
+        "text": "CraftPro Brasil | ATM10"
+      }
+    }
+  ]
+}
+
+All The Mons
+{
+  "embeds": [
+    {
+      "color": 5763719,
+      "title": "All The Mons | Beta Aberto",
+      "description": "O All The Mons ja esta disponivel em beta aberto. Entre agora, acompanhe a evolucao do projeto desde o inicio e participe da construcao competitiva da temporada.",
+      "fields": [
+        {
+          "name": "Conectar",
+          "value": "atmons.craftprobrasil.com.br",
+          "inline": false
+        },
+        {
+          "name": "Modpack",
+          "value": "All The Mons\nv0.14.0-beta",
+          "inline": true
+        },
+        {
+          "name": "Acesso",
+          "value": "Somente contas originais",
+          "inline": true
+        },
+        {
+          "name": "Status",
+          "value": "Beta Aberto",
+          "inline": true
+        },
+        {
+          "name": "Importante",
+          "value": "O servidor esta em fase de ajustes. O objetivo atual e corrigir bugs, validar sistemas e estabilizar a experiencia da temporada.",
+          "inline": false
+        },
+        {
+          "name": "Modo competitivo",
+          "value": "O sistema de ranqueadas ja esta ativo. Enfrente outros jogadores, suba de elo e dispute posicao entre os melhores da rede.",
+          "inline": false
+        },
+        {
+          "name": "Comandos uteis",
+          "value": "/ranked para entrar na fila\n/carena link para vincular sua conta ao Discord",
+          "inline": false
+        },
+        {
+          "name": "Ecossistema CraftPro",
+          "value": "Site: craftprobrasil.com.br\nRanking: craftprobrasil.com.br/ranking\nReplays/Web: craftprobrasil.com.br",
+          "inline": false
+        },
+        {
+          "name": "Torneios e recompensas",
+          "value": "Eventos semanais\nTrofeu permanente no perfil\nPresenca no ranking da temporada",
+          "inline": false
+        }
+      ],
+      "footer": {
+        "text": "CraftPro Brasil | All The Mons Beta"
+      }
+    }
+  ]
+}

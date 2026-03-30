@@ -58,6 +58,19 @@ export default function ProdutosPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setCategoryOptions(data.map((c: { name: string }) => c.name));
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -78,7 +91,8 @@ export default function ProdutosPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   function openCreateForm() {
     setEditingId(null);
@@ -459,15 +473,24 @@ export default function ProdutosPage() {
                 <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
                   Categoria <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
-                    formErrors.category ? 'border-red-500/50' : 'border-white/[0.08]'
-                  }`}
-                  placeholder="Ex: VIP, Kits, Itens"
-                />
+                {categoryOptions.length > 0 ? (
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className={`w-full px-3.5 py-2.5 bg-white/[0.04] border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all ${
+                      formErrors.category ? 'border-red-500/50' : 'border-white/[0.08]'
+                    }`}
+                  >
+                    <option value="" className="bg-[#11131a] text-zinc-400">Selecione uma categoria</option>
+                    {categoryOptions.map((cat) => (
+                      <option key={cat} value={cat} className="bg-[#11131a] text-white">{cat}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-zinc-500 text-sm">
+                    Nenhuma categoria criada. <a href="/categorias" className="text-violet-400 hover:underline">Criar categoria</a>
+                  </div>
+                )}
                 {formErrors.category && <p className="text-red-400 text-xs mt-1">{formErrors.category}</p>}
               </div>
 

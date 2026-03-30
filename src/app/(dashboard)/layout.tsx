@@ -110,6 +110,15 @@ export default async function DashboardLayout({
             </svg>
             <span className="text-[13px] font-medium">Pedidos</span>
           </Link>
+          <Link
+            href="/categorias"
+            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all duration-200"
+          >
+            <svg className="w-[18px] h-[18px] text-zinc-500 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <span className="text-[13px] font-medium">Categorias</span>
+          </Link>
         </nav>
 
         {/* Logout */}
