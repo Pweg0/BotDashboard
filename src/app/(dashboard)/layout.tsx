@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { auth, signOut } from '@/lib/auth';
 import { dbConnect } from '@/lib/db';
@@ -10,27 +9,45 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch (e) {
+    console.error('[Dashboard] Auth error:', e);
+    return <div className="text-white p-8">Erro de autenticacao. Verifique AUTH_SECRET.</div>;
+  }
 
   if (!session?.user) {
-    redirect('/login');
+    return <div className="text-white p-8">Nao autenticado. <a href="/login" className="underline">Login</a></div>;
   }
 
   const discordId = (session.user as { discordId?: string }).discordId;
 
   if (!discordId) {
-    redirect('/login?erro=acesso_negado');
+    return <div className="text-white p-8">Discord ID nao encontrado na sessao.</div>;
   }
 
-  // Role verification: check if user has the configured admin role
-  await dbConnect();
-  const config = await GuildConfig.findOne({
-    guildId: process.env.DISCORD_GUILD_ID,
-  });
-  const adminRoleId = config?.adminRoleId as string | undefined;
+  // Role verification
+  let hasRole = false;
+  try {
+    await dbConnect();
+    const config = await GuildConfig.findOne({
+      guildId: process.env.DISCORD_GUILD_ID,
+    });
+    const adminRoleId = config?.adminRoleId as string | undefined;
 
-  if (!adminRoleId || !(await hasAdminRole(discordId, adminRoleId))) {
-    redirect('/login?erro=acesso_negado');
+    if (!adminRoleId) {
+      return <div className="text-white p-8">adminRoleId nao configurado. Use /setup cargo-admin no Discord.</div>;
+    }
+
+    hasRole = await hasAdminRole(discordId, adminRoleId);
+  } catch (e) {
+    console.error('[Dashboard] Role check error:', e);
+    return <div className="text-white p-8">Erro ao verificar cargo: {String(e)}</div>;
+  }
+
+  if (!hasRole) {
+    return <div className="text-white p-8">Acesso negado. Voce nao tem o cargo de admin no Discord.</div>;
   }
 
   return (
