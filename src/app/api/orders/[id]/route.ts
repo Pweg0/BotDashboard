@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { dbConnect } from '@/lib/db';
+import { requireAdmin } from '@/lib/requireAdmin';
 import { Order } from '@/lib/models/Order';
 
 export async function PATCH(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
-
-  await dbConnect();
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
 
@@ -22,6 +17,7 @@ export async function PATCH(
       $set: {
         status: 'cancelled',
         cancelledAt: new Date(),
+        discordNotified: false,
       },
       $push: {
         statusHistory: { status: 'cancelled', changedAt: new Date() },

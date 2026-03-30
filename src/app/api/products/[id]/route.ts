@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { dbConnect } from '@/lib/db';
+import { requireAdmin } from '@/lib/requireAdmin';
 import { Product } from '@/lib/models/Product';
 
 type Params = Promise<{ id: string }>;
 
-export async function GET(_request: NextRequest, { params }: { params: Params }) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+const ALLOWED_FIELDS = ['name', 'description', 'price', 'imageUrl', 'category', 'stock', 'allowsMultiple', 'sortOrder', 'embedColor'] as const;
 
-  await dbConnect();
+export async function GET(_request: NextRequest, { params }: { params: Params }) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   const product = await Product.findById(id);
 
@@ -23,19 +21,30 @@ export async function GET(_request: NextRequest, { params }: { params: Params })
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-  await dbConnect();
   const { id } = await params;
   const body = await request.json();
 
-  // Strip protected fields — status managed via /publish, embed fields managed by bot
-  const { status: _status, embedMessageId: _embedMessageId, embedChannelId: _embedChannelId, ...updateData } = body;
+  // Whitelist allowed fields only
+  const updateData: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (body[key] !== undefined) updateData[key] = body[key];
+  }
 
-  const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
+  // Validate numeric fields if present
+  if (updateData.price !== undefined && (typeof updateData.price !== 'number' || (updateData.price as number) <= 0)) {
+    return NextResponse.json({ error: 'Preço deve ser um número positivo' }, { status: 400 });
+  }
+  if (updateData.stock !== undefined && updateData.stock !== null && (typeof updateData.stock !== 'number' || (updateData.stock as number) < 0 || !Number.isInteger(updateData.stock))) {
+    return NextResponse.json({ error: 'Estoque deve ser um inteiro não-negativo ou nulo' }, { status: 400 });
+  }
+  if (updateData.embedColor !== undefined && (typeof updateData.embedColor !== 'number' || (updateData.embedColor as number) < 0 || (updateData.embedColor as number) > 0xFFFFFF)) {
+    return NextResponse.json({ error: 'Cor do embed inválida' }, { status: 400 });
+  }
+
+  const product = await Product.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
   if (!product) {
     return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 });
@@ -45,12 +54,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Params }) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-  await dbConnect();
   const { id } = await params;
   const product = await Product.findById(id);
 

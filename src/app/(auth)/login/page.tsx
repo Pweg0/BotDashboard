@@ -27,7 +27,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <form
           action={async () => {
             'use server';
-            await signIn('discord', { redirectTo: '/dashboard/produtos' });
+            await signIn('discord', { redirectTo: '/produtos' });
           }}
         >
           <button

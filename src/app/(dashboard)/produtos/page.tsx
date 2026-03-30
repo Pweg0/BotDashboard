@@ -63,8 +63,12 @@ export default function ProdutosPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/products');
+      if (!res.ok) {
+        setActionError('Erro ao carregar produtos.');
+        return;
+      }
       const data = await res.json();
-      setProducts(data);
+      setProducts(Array.isArray(data) ? data : []);
     } catch {
       setActionError('Erro ao carregar produtos.');
     } finally {

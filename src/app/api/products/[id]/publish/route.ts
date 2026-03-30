@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { dbConnect } from '@/lib/db';
+import { requireAdmin } from '@/lib/requireAdmin';
 import { Product } from '@/lib/models/Product';
 
 type Params = Promise<{ id: string }>;
 
 export async function POST(_request: NextRequest, { params }: { params: Params }) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-  await dbConnect();
   const { id } = await params;
   const existing = await Product.findById(id);
 

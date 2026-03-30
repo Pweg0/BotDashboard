@@ -81,9 +81,13 @@ export default function PedidosPage() {
           params.set('status', status);
         }
         const res = await fetch(`/api/orders?${params.toString()}`);
+        if (!res.ok) {
+          setError('Erro ao carregar pedidos.');
+          return;
+        }
         const data = await res.json();
-        setOrders(data.orders);
-        setTotal(data.total);
+        setOrders(Array.isArray(data.orders) ? data.orders : []);
+        setTotal(data.total ?? 0);
       } catch {
         setError('Erro ao carregar pedidos.');
       } finally {

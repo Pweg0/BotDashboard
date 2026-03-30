@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/lib/auth';
 import { dbConnect } from '@/lib/db';
 import { GuildConfig } from '@/lib/models/GuildConfig';
@@ -18,7 +19,7 @@ export default async function DashboardLayout({
   }
 
   if (!session?.user) {
-    return <div className="text-white p-8">Nao autenticado. <a href="/login" className="underline">Login</a></div>;
+    redirect('/login');
   }
 
   const discordId = (session.user as { discordId?: string }).discordId;
@@ -47,7 +48,7 @@ export default async function DashboardLayout({
   }
 
   if (!hasRole) {
-    return <div className="text-white p-8">Acesso negado. Voce nao tem o cargo de admin no Discord.</div>;
+    redirect('/login?erro=acesso_negado');
   }
 
   return (
