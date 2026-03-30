@@ -29,6 +29,7 @@ export default async function DashboardLayout({
   }
 
   let hasRole = false;
+  let isMaster = false;
   try {
     await dbConnect();
     const config = await GuildConfig.findOne({
@@ -36,11 +37,17 @@ export default async function DashboardLayout({
     });
     const adminRoleId = config?.adminRoleId as string | undefined;
 
-    if (!adminRoleId) {
-      return <div className="text-white p-8">adminRoleId nao configurado. Use /setup cargo-admin no Discord.</div>;
-    }
+    // Master user always has access
+    isMaster = config?.masterUserId === discordId;
 
-    hasRole = await hasAdminRole(discordId, adminRoleId);
+    if (!isMaster) {
+      if (!adminRoleId) {
+        return <div className="text-white p-8">adminRoleId nao configurado. Use /setup cargo-admin no Discord.</div>;
+      }
+      hasRole = await hasAdminRole(discordId, adminRoleId);
+    } else {
+      hasRole = true;
+    }
   } catch (e) {
     console.error('[Dashboard] Role check error:', e);
     return <div className="text-white p-8">Erro ao verificar cargo: {String(e)}</div>;
@@ -119,6 +126,23 @@ export default async function DashboardLayout({
             </svg>
             <span className="text-[13px] font-medium">Categorias</span>
           </Link>
+          {isMaster && (
+            <>
+              <div className="mt-4 mb-2">
+                <p className="px-3 text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">Master</p>
+              </div>
+              <Link
+                href="/configuracoes"
+                className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all duration-200"
+              >
+                <svg className="w-[18px] h-[18px] text-zinc-500 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-[13px] font-medium">Configuracoes</span>
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Logout */}

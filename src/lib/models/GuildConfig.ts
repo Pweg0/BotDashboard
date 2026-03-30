@@ -9,7 +9,9 @@ const GuildConfigSchema = new Schema(
       default: {},
     },
     ordersChannelId: { type: String },
+    deliveredChannelId: { type: String },
     adminRoleId: { type: String },
+    masterUserId: { type: String },
   },
   {
     timestamps: true,

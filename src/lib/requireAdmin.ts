@@ -22,6 +22,12 @@ export async function requireAdmin(): Promise<NextResponse | null> {
   await dbConnect();
 
   const config = await GuildConfig.findOne({ guildId: process.env.DISCORD_GUILD_ID });
+
+  // Master user always authorized
+  if (config?.masterUserId === discordId) {
+    return null;
+  }
+
   const adminRoleId = config?.adminRoleId as string | undefined;
   if (!adminRoleId) {
     return NextResponse.json({ error: 'adminRoleId não configurado' }, { status: 403 });
