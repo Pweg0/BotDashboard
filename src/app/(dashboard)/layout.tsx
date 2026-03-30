@@ -63,7 +63,7 @@ export default async function DashboardLayout({
 
         <nav className="flex-1 p-4 space-y-1">
           <Link
-            href="/dashboard/produtos"
+            href="/produtos"
             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
           >
             <svg
@@ -82,7 +82,7 @@ export default async function DashboardLayout({
             Produtos
           </Link>
           <Link
-            href="/dashboard/pedidos"
+            href="/pedidos"
             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
           >
             <svg
